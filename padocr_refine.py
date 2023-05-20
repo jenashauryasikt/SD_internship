@@ -96,7 +96,7 @@ def add_logs(dir_path, log_names, images):
     for i in range(len(images)):
         image = images[i]
         log_name = log_names[i]
-        log_df = pd.read_csv(log_name)
+        log_df = pd.read_csv(log_name, header=None)
         # Create a copy of the image to draw on
         clone = image.copy()
         # Initialize variables for bounding box drawing
@@ -145,7 +145,7 @@ def add_logs(dir_path, log_names, images):
             elif key == ord('r'):
                 # Remove the drawn bounding box and text if 'r' is pressed
                 clone = image.copy()
-                log_df = pd.read_csv(log_name)
+                log_df = pd.read_csv(log_name, header=None)
         new_images.append(clone)
         new_log_dfs.append(log_df)
         # Close the image window
@@ -220,7 +220,7 @@ def corr_logs(dir_path, img_names, images, log_dfs):
             elif key == 13 and selected_box is not None:
                 # Prompt the user to enter a new annotation for the selected bounding box
                 text = input("Enter the new annotation: ")
-                log_df.loc[selected_box, 1] = text
+                log_df.iloc[selected_box, 1] = text
         # Save the corrected image and dataframe
         corr_image_name = os.path.join(corr_ann_path, str(img_name)+'_corr.jpg')
         corr_log_name = os.path.join(corr_logs_path, str(img_name)+'_corr.csv')
