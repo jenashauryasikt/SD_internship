@@ -57,16 +57,18 @@ def make_logs(dir_path, img_list, ocr):
     images = []
     img_names = []
     for img in img_list:
-        image = cv2.imread(img)
-        result = ocr.ocr(img, cls=True)
-        # obtain bounding boxes of text blocks with confidence scores
-        boxes, txts, scores = extract_text(result)
         # identify file name without any extension
         img_name = (str(img).split('/')[-1]).split('.')[0]
         img_names.append(img_name)
         # store logs and simple annotations
         log_name = logs_path + '/' + img_name + '_logs.csv'
         new_img_name = ann_path + '/' + img_name + '_ann.jpg'
+        print(img_name)
+        image = cv2.imread(img)
+        print(img)
+        result = ocr.ocr(img, cls=True)
+        # obtain bounding boxes of text blocks with confidence scores
+        boxes, txts, scores = extract_text(result)
         with open(log_name, 'w') as f:
             csvwriter = csv.writer(f, quoting=csv.QUOTE_ALL)
             for i in range(len(boxes)):
@@ -97,6 +99,7 @@ def add_logs(dir_path, log_names, images):
         image = images[i]
         log_name = log_names[i]
         log_df = pd.read_csv(log_name, header=None)
+        log_ori = pd.read_csv(log_name, header=None)
         # Create a copy of the image to draw on
         clone = image.copy()
         # Initialize variables for bounding box drawing
@@ -126,6 +129,7 @@ def add_logs(dir_path, log_names, images):
                 # Obtain the coordinates of the bounding box corners
                 bbox_corners = str([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])
                 log_df.loc[len(log_df)] = [bbox_corners, text, np.nan]
+                log_ori.loc[len(log_ori)] = [bbox_corners, np.nan, np.nan]
                 # log_df = log_df.append(pd.Series([bbox_corners, text], index=log_df.columns), ignore_index=True)
         # Create a new window to display the image
         cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
@@ -146,8 +150,10 @@ def add_logs(dir_path, log_names, images):
                 # Remove the drawn bounding box and text if 'r' is pressed
                 clone = image.copy()
                 log_df = pd.read_csv(log_name, header=None)
+                log_ori = pd.read_csv(log_name, header=None)
         new_images.append(clone)
         new_log_dfs.append(log_df)
+        log_ori.to_csv(log_name, index=False)
         # Close the image window
         cv2.destroyAllWindows()    
     return new_images, new_log_dfs
@@ -191,8 +197,8 @@ def corr_logs(dir_path, img_names, images, log_dfs):
                 # Left mouse button released, stop drawing
                 drawing = False
                 color = (0, 0, 255)
-                cv2.rectangle(clone, (x1, y1), (x2, y2), color, 2)
-                cv2.putText(clone, texts[j], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
+                # cv2.rectangle(clone, (x1, y1), (x2, y2), color, 2)
+                # cv2.putText(clone, texts[j], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
                 # selected_box = None
 
         # Create a new window to display the image
